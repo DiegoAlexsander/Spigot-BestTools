@@ -34,7 +34,7 @@ public class CommandBestTools implements CommandExecutor {
         }
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage("You must be a player to run this command.");
+            Messages.sendMessage(sender, main.messages.MSG_PLAYER_ONLY);
             return true;
         }
 

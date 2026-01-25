@@ -93,8 +93,8 @@
             <url>https://repo.codemc.org/repository/maven-public/</url>
         </repository>
         <repository>
-            <id>jeff-media-public</id>
-            <url>https://repo.jeff-media.com/public/</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
         <repository>
             <id>enginehub-repo</id>
@@ -145,7 +145,7 @@
         <dependency>
             <groupId>com.jeff_media</groupId>
             <artifactId>SpigotUpdateChecker</artifactId>
-            <version>3.0.3</version>
+            <version>3.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

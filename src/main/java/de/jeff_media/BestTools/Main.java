@@ -135,8 +135,6 @@ public class Main extends JavaPlugin {
         loadDefaultValues();
 
         updateChecker = new UpdateChecker(this, UpdateCheckSource.SPIGOT, "81490")
-            //.setDownloadLink("https://www.spigotmc.org/resources/besttools.81490/")
-            //.setChangelogLink("https://github.com/JEFF-Media-GbR/Spigot-BestTools/blob/master/CHANGELOG.md")
             .setDonationLink("https://www.chestsort.de/donate")
             .suppressUpToDateMessage(true);
         toolHandler = new BestToolsHandler(this);

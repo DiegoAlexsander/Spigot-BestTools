@@ -159,8 +159,27 @@ message-besttools-usage: "&7Hint: Type &6/besttools&7 or &6/bt&7 to automaticall
 message-refill-usage: "&7Hint: Type &6/refill&7 or &6/rf&7 to automatically refill empty items from your inventory."
 message-hotbar-only-enabled: "&7BestTools will only use tools from your hotbar."
 message-hotbar-only-disabled: "&7BestTools will use all tools from your inventory."
+
+# Reload, Debug and Performance messages
+message-no-permission: "&cYou don't have permission to use this command."
+message-config-reloaded: "&aBestTools config has been reloaded."
+message-debug-enabled: "&cBestTools debug mode has been enabled."
+message-debug-disabled: "&aBestTools debug mode has been disabled."
+message-performance-enabled: "&cBestTools performance test has been enabled."
+message-performance-disabled: "&aBestTools performance test has been disabled."
+message-player-only: "&cYou must be a player to run this command."
+
+# Blacklist messages
+message-blacklist-empty: "&7Your blacklist is empty."
+message-blacklist-added: "&2Added to blacklist:&7 %s"
+message-blacklist-invalid: "&4Invalid items:&7 %s"
+message-blacklist-removed: "&2Removed from blacklist:&7 %s"
+message-blacklist-nothing-specified: "&7You must either hold an item in your hand or specify at least one material as parameter."
+blacklist-title: "----- &cBlacklist&r -----"
+
+# GUI messages
 gui-favorite-slot: "Set as favorite slot"
-gui-favorite-slot-lore: "If your hotbar is full and BestTools uses a tool from your inventory, it will be places in this slot."
+gui-favorite-slot-lore: "If your hotbar is full and BestTools uses a tool from your inventory, it will be placed in this slot."
 gui-besttools-lore: "Automatically chooses the best tools when breaking blocks."
 gui-hotbar-lore: "When enabled, BestTools will only use tools from your hotbar instead of from your whole inventory."
 gui-refill-lore: "Automatically refills empty hotbar slots."

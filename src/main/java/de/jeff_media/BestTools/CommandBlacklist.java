@@ -41,7 +41,7 @@ public class CommandBlacklist implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
 
         if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage("This command is only available for players.");
+            Messages.sendMessage(commandSender, main.messages.MSG_PLAYER_ONLY);
             return true;
         }
 

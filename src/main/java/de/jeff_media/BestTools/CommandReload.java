@@ -1,6 +1,5 @@
 package de.jeff_media.BestTools;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -10,11 +9,11 @@ public class CommandReload {
 
 
             if (!sender.hasPermission("besttools.reload")) {
-                sender.sendMessage(ChatColor.YELLOW + main.getName() + ": you don't have permission to use this command.");
+                Messages.sendMessage(sender, main.messages.MSG_NO_PERMISSION);
                 return;
             }
             main.load(true);
-            sender.sendMessage(ChatColor.GREEN + main.getName() + " has been reloaded.");
+            Messages.sendMessage(sender, main.messages.MSG_CONFIG_RELOADED);
     }
 
 }

@@ -19,6 +19,15 @@ public class Messages {
             MSG_HOTBAR_ONLY_DISABLED;
 
     final String
+            MSG_NO_PERMISSION,
+            MSG_CONFIG_RELOADED,
+            MSG_DEBUG_ENABLED,
+            MSG_DEBUG_DISABLED,
+            MSG_PERFORMANCE_ENABLED,
+            MSG_PERFORMANCE_DISABLED,
+            MSG_PLAYER_ONLY;
+
+    final String
             GUI_BESTTOOLS_ENABLED,
             GUI_BESTTOOLS_DISABLED,
             GUI_REFILL_ENABLED,
@@ -54,6 +63,14 @@ public class Messages {
         MSG_HOTBAR_ONLY_ENABLED = getMsg("hotbar-only-enabled","&7BestTools will only use tools from your hotbar.");
         MSG_HOTBAR_ONLY_DISABLED = getMsg("hotbar-only-disabled","&7BestTools will use all tools from your inventory.");
 
+        MSG_NO_PERMISSION = getMsg("no-permission","&cYou don't have permission to use this command.");
+        MSG_CONFIG_RELOADED = getMsg("config-reloaded","&aBestTools config has been reloaded.");
+        MSG_DEBUG_ENABLED = getMsg("debug-enabled","&cBestTools debug mode has been enabled.");
+        MSG_DEBUG_DISABLED = getMsg("debug-disabled","&aBestTools debug mode has been disabled.");
+        MSG_PERFORMANCE_ENABLED = getMsg("performance-enabled","&cBestTools performance test has been enabled.");
+        MSG_PERFORMANCE_DISABLED = getMsg("performance-disabled","&aBestTools performance test has been disabled.");
+        MSG_PLAYER_ONLY = getMsg("player-only","&cYou must be a player to run this command.");
+
         GUI_BESTTOOLS_ENABLED = getMsg("gui","besttools-enabled","&6BestTools: &aenabled");
         GUI_BESTTOOLS_DISABLED = getMsg("gui","besttools-enabled","&6BestTools: &cdisabled");
         GUI_REFILL_ENABLED = getMsg("gui","refill-enabled","&6Refill: &aenabled");
@@ -75,11 +92,11 @@ public class Messages {
                 "When enabled, BestTools will only use tools from your hotbar instead of from your whole inventory."
         );
 
-        BL_EMPTY = getMsg("blacklist-empty","&7You blacklist is empty.");
+        BL_EMPTY = getMsg("blacklist-empty","&7Your blacklist is empty.");
         BL_ADDED = getMsg("blacklist-added","&2Added to blacklist:&7 %s");
         BL_INVALID = getMsg("blacklist-invalid","&4Invalid items:&7 %s");
         BL_REMOVED = getMsg("blacklist-removed","&2Removed from blacklist:&7 %s");
-        BL_NOTHINGSPECIFIED = getMsg("blacklist-nothing-specified","&7You must either hold an item in your hand or specify at least material as parameter.");
+        BL_NOTHINGSPECIFIED = getMsg("blacklist-nothing-specified","&7You must either hold an item in your hand or specify at least one material as parameter.");
 
         main.getConfig().addDefault("blacklist-title","----- &cBlacklist&r -----");
 
