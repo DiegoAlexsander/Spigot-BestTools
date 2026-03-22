@@ -1,5 +1,13 @@
 package de.jeff_media.BestTools;
 
+import de.jeff_media.BestTools.network.StorageMode;
+import de.jeff_media.BestTools.network.config.NetworkConfig;
+import de.jeff_media.BestTools.network.database.DatabaseManager;
+import de.jeff_media.BestTools.network.redis.RedisManager;
+import de.jeff_media.BestTools.network.storage.LocalStorageProvider;
+import de.jeff_media.BestTools.network.storage.MySQLStorageProvider;
+import de.jeff_media.BestTools.network.storage.StorageProvider;
+import de.jeff_media.BestTools.network.sync.DataSyncer;
 import de.jeff_media.BestTools.placeholders.BestToolsPlaceholders;
 
 import com.jeff_media.updatechecker.UpdateCheckSource;
@@ -50,14 +58,53 @@ public class Main extends JavaPlugin {
     GUIHandler guiHandler;
     UpdateChecker updateChecker;
 
-    boolean debug=false;
+    public boolean debug=false;
     boolean wtfdebug=false;
     boolean measurePerformance=false;
     PerformanceMeter meter;
 
-    HashMap<UUID,PlayerSetting> playerSettings;
+    public HashMap<UUID,PlayerSetting> playerSettings;
     boolean verbose = true;
 
+    // ── Multi-server / network storage ──────────────────────────────
+    private StorageProvider storageProvider;
+    private StorageMode     storageMode = StorageMode.LOCAL;
+    private RedisManager    redisManager;
+    DataSyncer      dataSyncer;
+
+    public StorageProvider getStorageProvider() { return storageProvider; }
+    public StorageMode     getStorageMode()     { return storageMode; }
+    public DataSyncer      getDataSyncer()      { return dataSyncer; }
+
+    // ── Settings fingerprint (reset mechanism) ───────────────────────
+    private int settingsFingerprint = 0;
+
+    public int getSettingsFingerprint() { return settingsFingerprint; }
+
+    /**
+     * Increments fingerprint, resets storage, broadcasts to Redis (NETWORK mode),
+     * and triggers a full plugin reload.
+     */
+    public void incrementFingerprint() {
+        settingsFingerprint++;
+        if (storageMode == StorageMode.NETWORK && dataSyncer != null) {
+            dataSyncer.onResetAll(settingsFingerprint);
+        } else if (storageProvider != null) {
+            storageProvider.saveFingerprint(settingsFingerprint);
+        }
+        load(true);
+    }
+
+    /**
+     * Adopts a fingerprint received from another server via Redis and triggers reload.
+     */
+    public void incrementFingerprintFromRemote(int fingerprint) {
+        settingsFingerprint = fingerprint;
+        if (storageProvider != null) {
+            storageProvider.saveFingerprint(fingerprint);
+        }
+        load(true);
+    }
 
     @Override
     public void onEnable() {
@@ -69,7 +116,15 @@ public class Main extends JavaPlugin {
 
     }
 
-    void debug(String text) {
+    @Override
+    public void onDisable() {
+        // Shutdown network connections
+        if (redisManager != null) { redisManager.shutdown(); redisManager = null; }
+        if (storageProvider != null) { storageProvider.shutdown(); storageProvider = null; }
+        dataSyncer = null;
+    }
+
+    public void debug(String text) {
         if(debug) getLogger().info("[Debug] "+text);
     }
     void wtfdebug(String text) {
@@ -78,37 +133,29 @@ public class Main extends JavaPlugin {
 
     public PlayerSetting getPlayerSetting(Player player) {
 
-        //System.out.println("Getting player setting...");
-
         if(Objects.requireNonNull(playerSettings,"PlayerSettings must not be null").containsKey(player.getUniqueId())) {
-            //System.out.println("Found loaded setting");
             return playerSettings.get(player.getUniqueId());
         }
 
-        PlayerSetting setting;
+        // Delegate loading to the active StorageProvider
+        PlayerSetting setting = storageProvider.loadPlayer(player);
 
-
-        File file = getPlayerDataFile(player.getUniqueId());
-        if(file.exists()) {
-            //System.out.println("Getting setting from legacy file");
-            debug("Loading player setting for "+player.getName()+" from file");
-            setting = new PlayerSetting(player,file);
-            file.delete();
-        } else {
-            //System.out.println("Creating setting from PDC");
-            debug("Creating new player setting for "+player.getName());
-            setting = new PlayerSetting(player,
-                    getConfig().getBoolean("besttools-enabled-by-default"),
-                    getConfig().getBoolean("refill-enabled-by-default"),
-                    getConfig().getBoolean("hotbar-only"),
-                    getConfig().getInt("favorite-slot"),
-                    getConfig().getBoolean("use-sword-on-hostile-mobs"));
+        // For MYSQL / NETWORK modes, attach a save callback so every toggle is persisted immediately
+        if (storageMode != StorageMode.LOCAL) {
+            final UUID uid = player.getUniqueId();
+            final PlayerSetting ref = setting;
+            if (storageMode == StorageMode.NETWORK && dataSyncer != null) {
+                setting.setOnChanged(() -> dataSyncer.onSettingChanged(uid, ref));
+            } else {
+                setting.setOnChanged(() -> storageProvider.savePlayer(uid, ref));
+            }
         }
-        playerSettings.put(player.getUniqueId(),setting);
+
+        playerSettings.put(player.getUniqueId(), setting);
         return setting;
     }
 
-    File getPlayerDataFile(UUID uuid) {
+    public File getPlayerDataFile(UUID uuid) {
         return new File(getDataFolder()+File.separator+"playerdata"+File.separator+uuid.toString()+".yml");
     }
 
@@ -124,6 +171,10 @@ public class Main extends JavaPlugin {
             HandlerList.unregisterAll(this);
             reloadConfig();
 
+            // Shutdown existing network connections before re-init
+            if (redisManager != null) { redisManager.shutdown(); redisManager = null; }
+            if (storageProvider != null) { storageProvider.shutdown(); storageProvider = null; }
+            dataSyncer = null;
         }
 
         if (getConfig().getInt("config-version", 0) != configVersion) {
@@ -152,6 +203,11 @@ public class Main extends JavaPlugin {
         playerSettings = new HashMap<>();
         guiHandler = new GUIHandler(this);
 
+        // Initialize storage provider
+        initStorageProvider();
+        // Restore saved fingerprint (keeps reset state across restarts / reloads)
+        settingsFingerprint = storageProvider.getStoredFingerprint();
+
         meter = new PerformanceMeter(this);
 
         getServer().getPluginManager().registerEvents(refillListener,this);
@@ -160,6 +216,7 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(bestToolsCacheListener,this);
         getServer().getPluginManager().registerEvents(guiHandler,this);
         Objects.requireNonNull(getCommand("besttools")).setExecutor(commandBestTools);
+        Objects.requireNonNull(getCommand("besttools")).setTabCompleter(commandBestTools);
         Objects.requireNonNull(getCommand("refill")).setExecutor(commandRefill);
 
         if(getConfig().getBoolean("dump",false)) {
@@ -181,6 +238,51 @@ public class Main extends JavaPlugin {
 
     }
 
+    private void initStorageProvider() {
+        storageMode = StorageMode.fromConfig(getConfig().getString(NetworkConfig.STORAGE_MODE, "LOCAL"));
+
+        switch (storageMode) {
+            case MYSQL:
+            case NETWORK: {
+                DatabaseManager db = new DatabaseManager(this);
+                MySQLStorageProvider mysqlProvider = new MySQLStorageProvider(this, db);
+                try {
+                    mysqlProvider.initialize();
+                    storageProvider = mysqlProvider;
+                } catch (Exception e) {
+                    getLogger().severe("[BestTools] Cannot connect to MySQL — falling back to LOCAL mode.");
+                    getLogger().severe("[BestTools] Cause: " + e.getMessage());
+                    storageMode = StorageMode.LOCAL;
+                    storageProvider = new LocalStorageProvider(this);
+                    break;
+                }
+
+                getLogger().info("[BestTools] Storage mode: " + storageMode);
+
+                if (storageMode == StorageMode.NETWORK) {
+                    redisManager = new RedisManager(this);
+                    try {
+                        redisManager.initialize();
+                        dataSyncer = new DataSyncer(this, redisManager, storageProvider);
+                    } catch (Exception e) {
+                        getLogger().severe("[BestTools] Cannot connect to Redis — downgrading to MYSQL mode.");
+                        getLogger().severe("[BestTools] Cause: " + e.getMessage());
+                        redisManager.shutdown();
+                        redisManager = null;
+                        storageMode = StorageMode.MYSQL;
+                    }
+                }
+                break;
+            }
+            case LOCAL:
+            default: {
+                storageProvider = new LocalStorageProvider(this);
+                getLogger().info("[BestTools] Storage mode: LOCAL");
+                break;
+            }
+        }
+    }
+
     private void registerMetrics() {
         @SuppressWarnings("unused")
         Metrics metrics = new Metrics(this,8187);
@@ -198,6 +300,8 @@ public class Main extends JavaPlugin {
         getConfig().addDefault("puns",false);
         getConfig().addDefault("use-sword-on-hostile-mobs",true);
         getConfig().addDefault("use-axe-as-sword",false);
+        getConfig().addDefault("allow-gui", true);
+        getConfig().addDefault("allow-commands", true);
 
         verbose = getConfig().getBoolean("verbose",true);
         debug = getConfig().getBoolean("debug",false);

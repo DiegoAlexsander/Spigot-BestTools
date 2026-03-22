@@ -73,6 +73,13 @@ favorite-slot: 8
 # When set to true, it works in survival and adventure game mode
 allow-in-adventure-mode: false
 
+# You can prevent players from using the GUI. When set to "false", /besttools gui behaves like /besttools toggle
+allow-gui: true
+
+# You can prevent players from using the /besttools and /refill commands by setting
+# this to false. OPs and players with besttools.admin can always use admin commands.
+allow-commands: true
+
 # When enabled, BestTools will not attempt to switch any tools when the player is
 # holding a sword, crossbow, bow or trident
 dont-switch-during-battle: true
@@ -159,6 +166,10 @@ message-besttools-usage: "&7Hint: Type &6/besttools&7 or &6/bt&7 to automaticall
 message-refill-usage: "&7Hint: Type &6/refill&7 or &6/rf&7 to automatically refill empty items from your inventory."
 message-hotbar-only-enabled: "&7BestTools will only use tools from your hotbar."
 message-hotbar-only-disabled: "&7BestTools will use all tools from your inventory."
+message-favoriteslot-set: "&7Favorite slot set to &6%s&7."
+message-favoriteslot-invalid: "&cInvalid slot. Use a number between 1 and 9."
+message-move-to-favorite-enabled: "&7Tools will now be &amoved to your favorite slot&7."
+message-move-to-favorite-disabled: "&7Tools will &cstay in their current slot&7 when already in the hotbar."
 
 # Reload, Debug and Performance messages
 message-no-permission: "&cYou don't have permission to use this command."
@@ -168,6 +179,7 @@ message-debug-disabled: "&aBestTools debug mode has been disabled."
 message-performance-enabled: "&cBestTools performance test has been enabled."
 message-performance-disabled: "&aBestTools performance test has been disabled."
 message-player-only: "&cYou must be a player to run this command."
+message-reset-all-done: "&cAll player settings have been reset."
 
 # Blacklist messages
 message-blacklist-empty: "&7Your blacklist is empty."
@@ -401,3 +413,49 @@ puns: false
 # Do not change the following line! It is used to automatically update
 # your config to the latest version. Your changes will be kept.
 config-version: 17
+
+###############################
+## Multi-server settings     ##
+###############################
+
+# Storage mode for player settings:
+#   LOCAL   - Persistent Data Container on player entity (default, single server)
+#   MYSQL   - MySQL database (single or multi server without real-time sync)
+#   NETWORK - MySQL + Redis (multi server with real-time sync)
+storage-mode: LOCAL
+
+# MySQL database settings (used when storage-mode is MYSQL or NETWORK)
+mysql:
+  host: localhost
+  port: 3306
+  database: minecraft
+  username: root
+  password: ""
+  # Prefix added to all table names (e.g. "besttools_players", "besttools_blacklist")
+  table-prefix: besttools_
+  connection-pool:
+    maximum-pool-size: 10
+    minimum-idle: 2
+    max-lifetime: 1800000       # ms — 30 minutes
+    connection-timeout: 5000    # ms — 5 seconds
+
+# Redis settings (used when storage-mode is NETWORK)
+redis:
+  host: localhost
+  port: 6379
+  # ACL username (Redis 6+). Leave empty to use the default user (password-only auth).
+  username: ""
+  # Password. Leave empty if Redis has no authentication.
+  password: ""
+  database: 0
+  use-ssl: false
+  timeout: 2000   # ms — connection and socket timeout
+  # Cluster ID — all servers sharing the same player base must use the same value.
+  # Change this if you run multiple independent networks on the same Redis instance.
+  cluster-id: main
+  # Redis Sentinel (high-availability). Leave master empty to use standalone mode.
+  sentinel:
+    master: ""
+    nodes: []
+    password: ""
+    username: ""

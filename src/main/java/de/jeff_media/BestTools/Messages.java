@@ -16,7 +16,13 @@ public class Messages {
             MSG_REFILL_ENABLED,
             MSG_REFILL_DISABLED,
             MSG_HOTBAR_ONLY_ENABLED,
-            MSG_HOTBAR_ONLY_DISABLED;
+            MSG_HOTBAR_ONLY_DISABLED,
+            MSG_FAVORITESLOT_SET,
+            MSG_FAVORITESLOT_CURRENT,
+            MSG_FAVORITESLOT_INVALID,
+            MSG_MOVE_TO_FAVORITE_ENABLED,
+            MSG_MOVE_TO_FAVORITE_DISABLED,
+            MSG_RESET_ALL_DONE;
 
     final String
             MSG_NO_PERMISSION,
@@ -62,6 +68,13 @@ public class Messages {
 
         MSG_HOTBAR_ONLY_ENABLED = getMsg("hotbar-only-enabled","&7BestTools will only use tools from your hotbar.");
         MSG_HOTBAR_ONLY_DISABLED = getMsg("hotbar-only-disabled","&7BestTools will use all tools from your inventory.");
+
+        MSG_FAVORITESLOT_SET     = getMsg("favoriteslot-set",     "&7Favorite slot set to &6%s&7.");
+        MSG_FAVORITESLOT_CURRENT = getMsg("favoriteslot-current", "&7Your current favorite slot is &6%s&7.");
+        MSG_FAVORITESLOT_INVALID = getMsg("favoriteslot-invalid", "&cInvalid slot. Use a number between 1 and 9.");
+        MSG_MOVE_TO_FAVORITE_ENABLED  = getMsg("move-to-favorite-enabled",  "&7Tools will now be &amoved to your favorite slot&7.");
+        MSG_MOVE_TO_FAVORITE_DISABLED = getMsg("move-to-favorite-disabled", "&7Tools will &cstay in their current slot&7 when already in the hotbar.");
+        MSG_RESET_ALL_DONE       = getMsg("reset-all-done",       "&cAll player settings have been reset.");
 
         MSG_NO_PERMISSION = getMsg("no-permission","&cYou don't have permission to use this command.");
         MSG_CONFIG_RELOADED = getMsg("config-reloaded","&aBestTools config has been reloaded.");

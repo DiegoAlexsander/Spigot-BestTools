@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import de.jeff_media.BestTools.network.StorageMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,11 +120,24 @@ public class CommandBlacklist implements CommandExecutor {
                     p.sendMessage(String.format(main.messages.BL_INVALID, stringlist2string(errors)));
                 }
                 if (successes.size() > 0) {
+                    main.getPlayerSetting(p).getBtcache().invalidated();
                     String message;
                     if (option.equals("add")) {
                         message = main.messages.BL_ADDED;
+                        // Persist blacklist additions
+                        if (main.getStorageMode() == StorageMode.NETWORK && main.getDataSyncer() != null) {
+                            main.getDataSyncer().onBlacklistAdd(p.getUniqueId(), successes);
+                        } else if (main.getStorageMode() != StorageMode.LOCAL) {
+                            main.getStorageProvider().addToBlacklist(p.getUniqueId(), successes);
+                        }
                     } else {
                         message = main.messages.BL_REMOVED;
+                        // Persist blacklist removals
+                        if (main.getStorageMode() == StorageMode.NETWORK && main.getDataSyncer() != null) {
+                            main.getDataSyncer().onBlacklistRemove(p.getUniqueId(), successes);
+                        } else if (main.getStorageMode() != StorageMode.LOCAL) {
+                            main.getStorageProvider().removeFromBlacklist(p.getUniqueId(), successes);
+                        }
                     }
                     p.sendMessage(String.format(message, matlist2string(successes)));
                 }
@@ -132,6 +146,13 @@ public class CommandBlacklist implements CommandExecutor {
             case "reset":
                 p.sendMessage(String.format(main.messages.BL_REMOVED, matlist2string(b.mats)));
                 b.mats.clear();
+                main.getPlayerSetting(p).getBtcache().invalidated();
+                // Persist blacklist reset
+                if (main.getStorageMode() == StorageMode.NETWORK && main.getDataSyncer() != null) {
+                    main.getDataSyncer().onBlacklistReset(p.getUniqueId());
+                } else if (main.getStorageMode() != StorageMode.LOCAL) {
+                    main.getStorageProvider().clearBlacklist(p.getUniqueId());
+                }
                 return true;
             default:
                 return false;

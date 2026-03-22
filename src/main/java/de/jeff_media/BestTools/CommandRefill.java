@@ -33,8 +33,15 @@ public class CommandRefill implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (!main.getConfig().getBoolean("allow-commands", true)) {
+            if (sender instanceof Player && !((Player) sender).isOp()) {
+                Messages.sendMessage(sender, main.messages.MSG_NO_PERMISSION);
+                return true;
+            }
+        }
+
         if(!(sender instanceof Player)) {
-            sender.sendMessage("You must be a player to run this command.");
+            Messages.sendMessage(sender, main.messages.MSG_PLAYER_ONLY);
             return true;
         }
 

@@ -11,9 +11,9 @@ import java.util.List;
 
 public class Blacklist {
 
-    List<Material> mats;
+    public List<Material> mats;
 
-    Blacklist(List<String> strings) {
+    public Blacklist(List<String> strings) {
         mats = new ArrayList<>();
         for(String s : strings) {
             Material mat = Material.getMaterial(s);
@@ -21,24 +21,24 @@ public class Blacklist {
         }
     }
 
-    Blacklist() {
+    public Blacklist() {
         mats = new ArrayList<>();
     }
 
-    void add(String string) {
+    public void add(String string) {
         Material mat = Material.getMaterial(string);
-        if(mat!=null) mats.add(mat);
+        if(mat!=null && !mats.contains(mat)) mats.add(mat);
     }
 
-    void add(Material mat) {
-        mats.add(mat);
+    public void add(Material mat) {
+        if(!mats.contains(mat)) mats.add(mat);
     }
 
-    boolean contains(Material mat) {
+    public boolean contains(Material mat) {
         return mats.contains(mat);
     }
 
-    void remove(Material mat) {
+    public void remove(Material mat) {
         if(mats.contains(mat)) mats.remove(mat);
     }
 

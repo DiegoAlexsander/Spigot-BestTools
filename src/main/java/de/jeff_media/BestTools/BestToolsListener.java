@@ -69,7 +69,7 @@ public class BestToolsListener implements Listener {
             //playerSetting.getBtcache().validate(enemy.getType());
             return;
         }
-        switchToBestRoscoe(p, bestRoscoe,playerSetting.isHotbarOnly(),playerSetting.getFavoriteSlot());
+        switchToBestRoscoe(p, bestRoscoe,playerSetting.isHotbarOnly(),playerSetting.getFavoriteSlot(),playerSetting.isMoveToFavorite());
         //playerSetting.getBtcache().validate(enemy.getType());
         main.meter.add(st,false);
 
@@ -161,20 +161,12 @@ public class BestToolsListener implements Listener {
             playerSetting.getBtcache().validate(block.getType());
             return;
         }
-        switchToBestTool(p, bestTool,playerSetting.isHotbarOnly(),block.getType()/*,playerSetting.getFavoriteSlot()*/);
+        switchToBestTool(p, bestTool,playerSetting.isHotbarOnly(),block.getType(),playerSetting.getFavoriteSlot(),playerSetting.isMoveToFavorite());
         playerSetting.getBtcache().validate(block.getType());
         main.meter.add(st,false);
     }
 
-    private int getFavoriteSlot(Player player) {
-        if(main.getConfig().getInt("favorite-slot")==-1) {
-            return player.getInventory().getHeldItemSlot();
-        } else {
-            return main.getConfig().getInt("favorite-slot");
-        }
-    }
-
-    private void switchToBestTool(Player p, ItemStack bestTool, boolean hotbarOnly, Material target) {
+    private void switchToBestTool(Player p, ItemStack bestTool, boolean hotbarOnly, Material target, int favoriteSlot, boolean moveToFavorite) {
 
         PlayerInventory inv = p.getInventory();
         if(bestTool == null) {
@@ -192,22 +184,22 @@ public class BestToolsListener implements Listener {
             bestTool = handler.getNonToolItemFromArray(handler.inventoryToArray(p,hotbarOnly),currentItem,target);
         }
         if(bestTool == null) {
-            handler.freeSlot(getFavoriteSlot(p),inv);
+            handler.freeSlot(favoriteSlot,inv);
             main.debug("Could not find any appropiate tool");
             return;
         }
         int positionInInventory = handler.getPositionInInventory(bestTool,inv) ;
         if(positionInInventory != -1) {
-            handler.moveToolToSlot(positionInInventory,getFavoriteSlot(p),inv);
+            handler.moveToolToSlot(positionInInventory,favoriteSlot,moveToFavorite,inv);
             main.debug("Found tool");
         } else {
-            handler.freeSlot(getFavoriteSlot(p),inv);
+            handler.freeSlot(favoriteSlot,inv);
             main.debug("Use no tool");
         }
 
     }
 
-    private void switchToBestRoscoe(Player p, ItemStack bestRoscoe, boolean hotbarOnly, int favoriteSlot) {
+    private void switchToBestRoscoe(Player p, ItemStack bestRoscoe, boolean hotbarOnly, int favoriteSlot, boolean moveToFavorite) {
 
         PlayerInventory inv = p.getInventory();
         if(bestRoscoe == null) {
@@ -231,7 +223,7 @@ public class BestToolsListener implements Listener {
         }
         int positionInInventory = handler.getPositionInInventory(bestRoscoe,inv) ;
         if(positionInInventory != -1) {
-            handler.moveToolToSlot(positionInInventory,favoriteSlot,inv);
+            handler.moveToolToSlot(positionInInventory,favoriteSlot,moveToFavorite,inv);
             main.debug("Found tool");
         } else {
             handler.freeSlot(favoriteSlot,inv);

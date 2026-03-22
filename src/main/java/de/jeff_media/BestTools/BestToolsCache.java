@@ -2,7 +2,7 @@ package de.jeff_media.BestTools;
 
 import org.bukkit.Material;
 
-class BestToolsCache {
+public class BestToolsCache {
 
     // This is quite useful right now
 
@@ -10,7 +10,7 @@ class BestToolsCache {
 
     Material lastMat = null;
 
-    void invalidated() {
+    public void invalidated() {
         lastMat=null;
         valid=false;
     }

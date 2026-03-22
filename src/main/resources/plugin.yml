@@ -16,9 +16,12 @@ commands:
     usage: |
       /<command> -- Toggle automatically using the best tool
       /<command> hotbar -- Toggle whether to only use tools from your hotbar
+      /<command> favoriteslot <1-9> -- Set your favorite hotbar slot (also: fs)
+      /<command> gui -- Open the settings GUI
       /<command> reload -- Reloads the config file
       /<command> debug -- Toggle debug mode
       /<command> performance -- Toggle performance test
+      /<command> resetplayersettings -- Reset all players to config defaults (admin)
 
       /<command> bl -- Show your blacklist
       /<command> bl add -- Adds your currently held item to your blacklist
@@ -47,3 +50,5 @@ permissions:
     description: Allows to reload the config via /besttools reload
   besttools.debug:
     description: Allows to enable the debug mode via /besttools debug and the performance test via /besttools performance
+  besttools.admin:
+    description: Allows admin commands like /besttools resetplayersettings

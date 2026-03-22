@@ -375,15 +375,16 @@ public class BestToolsHandler {
      * Moves a tool to the given slot
      * @param source Slot where the tool is
      * @param dest Slot where the tool should be
+     * @param moveToFavorite If true, always move the tool to dest. If false and tool is in hotbar, just switch held slot.
      * @param inv Player's inventory
      */
-    void moveToolToSlot(int source, int dest, @NotNull PlayerInventory inv) {
-        main.debug(String.format("Moving item from slot %d to %d",source,dest));
+    void moveToolToSlot(int source, int dest, boolean moveToFavorite, @NotNull PlayerInventory inv) {
+        main.debug(String.format("Moving item from slot %d to %d (moveToFav=%b)",source,dest,moveToFavorite));
         inv.setHeldItemSlot(dest);
         if(source==dest) return;
         ItemStack sourceItem = inv.getItem(source);
         ItemStack destItem = inv.getItem(dest);
-        if(source < hotbarSize) {
+        if(!moveToFavorite && source < hotbarSize) {
             inv.setHeldItemSlot(source);
             return;
         }
